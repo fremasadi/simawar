@@ -37,7 +37,7 @@ class HomeView extends GetView<HomeController> {
                   Container(
                     height: 40.h,
                     width: 40.w,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(
                           image: AssetImage(
@@ -53,7 +53,7 @@ class HomeView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${controller.getGreting()},fremas',
+                        '${controller.getGreeting()},pigo',
                         style: TextStyle(
                           fontFamily: 'semiBold',
                           fontSize: 12.sp,
@@ -151,77 +151,103 @@ class HomeView extends GetView<HomeController> {
                   fontFamily: 'semiBold',
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(8.sp),
-                margin: EdgeInsets.symmetric(vertical: 12.sp),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.sp),
-                  color: ConstColor.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                      offset: const Offset(0, 2),
+              Obx(() {
+                if (controller.hasPendingOrder.value) {
+                  return  Text(
+                    "Mohon selesaikan pesanan Anda",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/icons/ic_ordering.png',
-                      width: 50.w,
-                      height: 50.h,
-                    ),
-                    SizedBox(
-                      width: 8.w,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'No.244432',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'semiBold',
-                            color: ConstColor.secondaryColor,
+                  );
+                }
+
+                if (controller.filteredOrders.isEmpty) {
+                  return const Center(child: Text("Tidak ada pesanan."));
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true, // Tambahkan ini untuk mencegah overflow
+                  physics: const NeverScrollableScrollPhysics(), // Nonaktifkan scroll pada ListView
+                  itemCount: controller.filteredOrders.length,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    var order = controller.filteredOrders[index];
+
+                    return Container(
+                      padding: EdgeInsets.all(8.sp),
+                      margin: EdgeInsets.symmetric(vertical: 8.sp),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.sp),
+                        color: ConstColor.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 3,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                        Text(
-                          'Estimasi Selesai :',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: ConstColor.black,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/icons/ic_ordering.png',
+                            width: 50.w,
+                            height: 50.h,
                           ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(6.sp),
-                          decoration: BoxDecoration(
-                            color: ConstColor.primaryColor,
-                            borderRadius: BorderRadius.circular(16.sp),
+                          SizedBox(width: 8.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                controller.getItemTypeString(order.type),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: 'semiBold',
+                                  color: ConstColor.secondaryColor,
+                                ),
+                              ),
+                              SizedBox(height: 4.h,),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Deadline : ',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: ConstColor.black,
+                                    ),
+                                  ),
+                                  Text(
+                                    order.deadline,
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: ConstColor.primaryColor,
+                                      fontFamily: 'semiBold',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            '29 September 2024 Pagi',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: ConstColor.white,
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () {
+                              Get.to(() => DetailOrderView(), arguments: {'order': order.toMap()});
+                            },
+                            icon: const Icon(
+                              Icons.arrow_forward_ios,
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () {
-                        Get.to(DetailOrderView());
-                      },
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
+                        ],
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    );
+                  },
+                );
+              }),
+
+
             ],
           ),
         ),

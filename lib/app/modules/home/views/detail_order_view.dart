@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:simawar/app/constants/const_color.dart';
+import 'package:simawar/app/modules/home/controllers/detail_order_controller.dart';
 
-class DetailOrderView extends GetView {
+class DetailOrderView extends GetView<DetailOrderController> {
   const DetailOrderView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> order = Get.arguments['order'];
+
+    final String orderId = order['id'] ?? '';
+    final String dateline = order['deadline'] ?? '';
+    final String imgUrl = order['imgUrl'] ?? '';
+    final Map<String, dynamic> sizes = order['sizes'] ?? {};
+    print('object $imgUrl');
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ConstColor.backgroundColor,
@@ -22,35 +31,36 @@ class DetailOrderView extends GetView {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             children: [
-              Center(
-                child: Image.asset(
-                  'assets/icons/ic_baju.png',
-                  width: context.width * .3,
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * .5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.sp),
+                  image: DecorationImage(image: NetworkImage(imgUrl),fit: BoxFit.fill)
                 ),
               ),
-              SizedBox(height: 20.h),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('Deadline $dateline',style: TextStyle(fontWeight: FontWeight.w700,fontSize: 14.sp),),
+              ),
               ListView(
                 shrinkWrap: true,
-                // This allows ListView inside SingleChildScrollView
-                physics: NeverScrollableScrollPhysics(),
-                // Prevent inner scroll conflict
-                children: [
-                  buildSizeCard('Lingkar Dada', '90 cm'),
-                  buildSizeCard('Lingkar Pinggang', '75 cm'),
-                  buildSizeCard('Lingkar Pinggul', '95 cm'),
-                  buildSizeCard('Lebar Bahu', '40 cm'),
-                  buildSizeCard('Panjang Lengan', '60 cm'),
-                  buildSizeCard('Panjang Baju', '70 cm'),
-                ],
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                children: sizes.entries.map((entry) {
+                  return buildSizeCard(entry.key, entry.value?.toString() ?? 'N/A');
+                }).toList(),
               ),
               Container(
-                margin: EdgeInsets.only(top: 50.sp),
+                margin: EdgeInsets.symmetric(vertical: 16.sp),
                 decoration: BoxDecoration(
                   color: ConstColor.primaryColor,
                   borderRadius: BorderRadius.circular(16.sp),
                 ),
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    controller.assignOrder(orderId);
+                  },
                   child: Text(
                     'Ambil Pesanan',
                     style: TextStyle(
@@ -60,7 +70,7 @@ class DetailOrderView extends GetView {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -79,7 +89,7 @@ class DetailOrderView extends GetView {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -87,7 +97,7 @@ class DetailOrderView extends GetView {
             Text(
               value,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
                 color: ConstColor.primaryColor,
               ),

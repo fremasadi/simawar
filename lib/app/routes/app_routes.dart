@@ -7,6 +7,7 @@ abstract class Routes {
   static const BASE = _Paths.BASE;
   static const ABSENSI = _Paths.ABSENSI;
   static const PROSES = _Paths.PROSES;
+  static const LOGIN = _Paths.LOGIN;
 }
 
 abstract class _Paths {
@@ -15,4 +16,5 @@ abstract class _Paths {
   static const BASE = '/base';
   static const ABSENSI = '/absensi';
   static const PROSES = '/proses';
+  static const LOGIN = '/login';
 }
