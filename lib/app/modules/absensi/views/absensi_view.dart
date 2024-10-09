@@ -37,8 +37,8 @@ class AbsensiView extends GetView<AbsensiController> {
         child: Padding(
           padding: EdgeInsets.only(
             top: ConstSize.appBarHeight(),
-            left: 20.sp,
-            right: 20.sp,
+            left: 16.sp,
+            right: 16.sp,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,21 +87,16 @@ class AbsensiView extends GetView<AbsensiController> {
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, // Jumlah kolom dalam grid
                     crossAxisSpacing: 8.sp,
+                    mainAxisSpacing: 8.sp,
                     childAspectRatio: 1.5, // Rasio ukuran grid
                   ),
                   itemCount: controller.absensiList.length,
                   itemBuilder: (context, index) {
-                    final data = controller.absensiList[index].data()
-                        as Map<String, dynamic>;
+                    final data = controller.absensiList[index];
 
-                    // Ambil data waktu
-                    final status = data['status'] ?? '-';
-                    final tanggal =
-                        data['tanggal'] ?? 'Tanggal Tidak Ditemukan';
-                    final waktu = (data['waktu'] as Timestamp?)?.toDate() ??
-                        DateTime.now();
-                    final formattedWaktu =
-                        DateFormat('HH:mm').format(waktu); // Format waktu
+                    final tanggal = data['tanggal'];
+                    final waktuMasuk = data['Masuk'] ?? '-';
+                    final waktuKeluar = data['Keluar'] ?? '-';
 
                     return Container(
                       padding: EdgeInsets.all(16.sp),
@@ -132,7 +127,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Status',
+                                    'Hadir',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontFamily: 'semiBold',
@@ -140,7 +135,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                     ),
                                   ),
                                   Text(
-                                    status,
+                                    waktuMasuk,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: Colors.black54,
@@ -152,7 +147,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Waktu',
+                                    'Keluar',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontFamily: 'semiBold',
@@ -160,7 +155,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                     ),
                                   ),
                                   Text(
-                                    formattedWaktu,
+                                    waktuKeluar,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: Colors.black54,

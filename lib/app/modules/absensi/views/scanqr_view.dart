@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:simawar/app/constants/const_color.dart';
 
 class ScanQrView extends StatefulWidget {
@@ -24,27 +23,22 @@ class _ScanQrViewState extends State<ScanQrView> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          // QR scanner view
           QRView(
             key: qrKey,
             onQRViewCreated: _onQRViewCreated,
           ),
-          // Overlay for the scanning box in the center
           Center(
             child: Container(
               width: 300,
               height: 300,
               decoration: BoxDecoration(
                 border: Border.all(color: ConstColor.primaryColor, width: 4),
-                // Kotak hijau
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
-          // Overlay to dim the screen except for the scanning box
-          Positioned.fill(
-            child:
-                ScannerOverlay(), // Custom overlay to make surrounding areas dimmed
+          const Positioned.fill(
+            child: ScannerOverlay(),
           ),
         ],
       ),
@@ -57,108 +51,90 @@ class _ScanQrViewState extends State<ScanQrView> {
       if (!hasScanned) {
         setState(() {
           qrData = scanData.code;
-          hasScanned = true; // Menghindari scanning berulang kali
+          hasScanned = true;
         });
-        _processQrData(scanData.code);
+        _processQRCode(scanData.code!);
       }
     });
   }
 
-  Future<void> _processQrData(String? code) async {
-    if (code == null) {
-      Get.snackbar(
-        backgroundColor: ConstColor.errorColor,
-        'QR Code Salah',
-        'QR Code tidak valid untuk absensi',
-        snackPosition: SnackPosition.TOP,
-      );
-      return;
-    }
-
+  Future<void> _processQRCode(String qrCode) async {
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId != null) {
-        DateTime now = DateTime.now();
-        String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+      final parts = qrCode.split('|');
+      final user = FirebaseAuth.instance.currentUser;
 
-        final absensiRef = FirebaseFirestore.instance
-            .collection('absensi')
-            .doc(userId)
-            .collection('absensiHarian');
+      if (parts.length == 2 &&
+          (parts[0] == 'ABSEN_MASUK' || parts[0] == 'ABSEN_KELUAR')) {
+        final timestamp = DateTime.parse(parts[1]);
 
-        // Cek apakah user sudah absen hadir atau keluar hari ini
-        final querySnapshot =
-            await absensiRef.where('tanggal', isEqualTo: formattedDate).get();
+        if (user != null) {
+          // Mengambil awal hari (midnight) dari waktu absen untuk membandingkan dengan Firestore
+          final startOfDay =
+              DateTime(timestamp.year, timestamp.month, timestamp.day);
 
-        if (code.startsWith('Hadir')) {
-          // Handle Absen Hadir
-          if (querySnapshot.docs.isNotEmpty &&
-              querySnapshot.docs.first['status'] == 'hadir') {
-            Get.snackbar(
-              backgroundColor: ConstColor.successColor,
-              'Sudah Absen',
-              'Anda sudah absen hadir hari ini!',
-              snackPosition: SnackPosition.TOP,
-            );
-          } else {
-            await absensiRef.add({
-              'status': 'hadir',
-              'tanggal': formattedDate,
-              'waktu': FieldValue.serverTimestamp(),
-            });
-            Get.snackbar(
-              backgroundColor: ConstColor.successColor,
-              'Berhasil',
-              'Absensi masuk berhasil disimpan!',
-              snackPosition: SnackPosition.TOP,
-            );
-          }
-        } else if (code.startsWith('Keluar')) {
-          // Handle Absen Keluar
-          if (querySnapshot.docs.isEmpty ||
-              querySnapshot.docs.first['status'] != 'hadir') {
-            Get.snackbar(
-              backgroundColor: ConstColor.errorColor,
-              'Gagal',
-              'Anda belum absen hadir hari ini!',
-              snackPosition: SnackPosition.TOP,
-            );
-          } else if (querySnapshot.docs.first['status'] == 'keluar') {
-            Get.snackbar(
-              backgroundColor: ConstColor.successColor,
-              'Sudah Absen Keluar',
-              'Anda sudah absen keluar hari ini!',
-              snackPosition: SnackPosition.TOP,
-            );
-          } else {
-            await absensiRef.add({
-              'status': 'keluar',
-              'tanggal': formattedDate,
-              'waktu': FieldValue.serverTimestamp(),
-            });
-            Get.snackbar(
-              backgroundColor: ConstColor.successColor,
-              'Berhasil',
-              'Absensi keluar berhasil disimpan!',
-              snackPosition: SnackPosition.TOP,
-            );
+          if (parts[0] == 'ABSEN_MASUK') {
+            // Query untuk memeriksa apakah absen masuk sudah ada untuk user pada hari ini
+            final absensiMasukQuery = await FirebaseFirestore.instance
+                .collection('absensi')
+                .where('userId', isEqualTo: user.uid)
+                .where('tipeAbsen', isEqualTo: 'Masuk')
+                .where('waktuAbsen', isGreaterThanOrEqualTo: startOfDay)
+                .get();
+
+            if (absensiMasukQuery.docs.isNotEmpty) {
+              // Jika sudah ada absen masuk hari ini
+              Get.snackbar(
+                  'Sudah Absen', 'Anda sudah melakukan absen masuk hari ini');
+            } else {
+              // Jika belum ada, tambahkan data absen masuk ke Firestore
+              await FirebaseFirestore.instance.collection('absensi').add({
+                'userId': user.uid,
+                'waktuAbsen': timestamp,
+                'tipeAbsen': 'Masuk',
+                'waktuScan': FieldValue.serverTimestamp(),
+              });
+              Get.snackbar('Sukses', 'Absensi masuk berhasil dicatat');
+            }
+          } else if (parts[0] == 'ABSEN_KELUAR') {
+            // Query untuk memeriksa apakah absen keluar sudah ada untuk user pada hari ini
+            final absensiKeluarQuery = await FirebaseFirestore.instance
+                .collection('absensi')
+                .where('userId', isEqualTo: user.uid)
+                .where('tipeAbsen', isEqualTo: 'Keluar')
+                .where('waktuAbsen', isGreaterThanOrEqualTo: startOfDay)
+                .get();
+
+            if (absensiKeluarQuery.docs.isNotEmpty) {
+              // Jika sudah ada absen keluar hari ini
+              Get.snackbar(
+                  'Sudah Absen', 'Anda sudah melakukan absen keluar hari ini');
+            } else {
+              // Jika belum ada, tambahkan data absen keluar ke Firestore
+              await FirebaseFirestore.instance.collection('absensi').add({
+                'userId': user.uid,
+                'waktuAbsen': timestamp,
+                'tipeAbsen': 'Keluar',
+                'waktuScan': FieldValue.serverTimestamp(),
+              });
+              Get.snackbar('Sukses', 'Absensi keluar berhasil dicatat');
+            }
           }
         } else {
-          Get.snackbar(
-            backgroundColor: ConstColor.errorColor,
-            'QR Code Salah',
-            'QR Code tidak valid untuk absensi',
-            snackPosition: SnackPosition.TOP,
-          );
+          Get.snackbar('Error', 'Pengguna tidak terautentikasi');
         }
+      } else {
+        Get.snackbar('Error', 'Format QR Code tidak valid');
       }
     } catch (e) {
-      Get.snackbar(
-        backgroundColor: ConstColor.errorColor,
-        'Gagal',
-        'Terjadi kesalahan saat menyimpan absensi: $e',
-        snackPosition: SnackPosition.TOP,
-      );
+      Get.snackbar('Error', 'Terjadi kesalahan: $e');
+    } finally {
+      // Reset scanner setelah 3 detik
+      Future.delayed(const Duration(seconds: 3), () {
+        setState(() {
+          hasScanned = false;
+          qrData = null;
+        });
+      });
     }
   }
 
@@ -170,48 +146,36 @@ class _ScanQrViewState extends State<ScanQrView> {
 }
 
 class ScannerOverlay extends StatelessWidget {
+  const ScannerOverlay({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Top overlay
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: MediaQuery.of(context).size.height / 2 + 150,
-          child: Container(
-            color: Colors.black.withOpacity(0.5),
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(
+        Colors.black.withOpacity(0.5),
+        BlendMode.srcOut,
+      ),
+      child: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              backgroundBlendMode: BlendMode.dstOut,
+            ),
           ),
-        ),
-        // Bottom overlay
-        Positioned(
-          top: MediaQuery.of(context).size.height / 2 + 150,
-          // Di bawah kotak QR
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(color: Colors.black.withOpacity(0.5)),
-        ),
-        // Left overlay
-        Positioned(
-          top: MediaQuery.of(context).size.height / 2 - 150,
-          // Kiri kotak QR
-          left: 0,
-          right: MediaQuery.of(context).size.width / 2 + 150,
-          bottom: MediaQuery.of(context).size.height / 2 - 150,
-          child: Container(color: Colors.black.withOpacity(0.5)),
-        ),
-        // Right overlay
-        Positioned(
-          top: MediaQuery.of(context).size.height / 2 - 150,
-          // Kanan kotak QR
-          left: MediaQuery.of(context).size.width / 2 + 150,
-          right: 0,
-          bottom: MediaQuery.of(context).size.height / 2 - 150,
-          child: Container(color: Colors.black.withOpacity(0.5)),
-        ),
-      ],
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              height: 300,
+              width: 300,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

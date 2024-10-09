@@ -17,8 +17,8 @@ class ProsesView extends GetView<ProsesController> {
         child: Padding(
           padding: EdgeInsets.only(
             top: ConstSize.appBarHeight(),
-            left: 20.sp,
-            right: 20.sp,
+            left: 16.sp,
+            right: 16.sp,
           ),
           child: Column(
             children: [
@@ -34,7 +34,14 @@ class ProsesView extends GetView<ProsesController> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (controller.orders.isEmpty) {
-                  return const Center(child: Text("Tidak ada pesanan."));
+                  return Center(
+                      child: Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * .3),
+                    child: const Text(
+                        textAlign: TextAlign.center,
+                        "Tidak ada pesanan yang sedang dikerjakan Silakan ambil pesanan."),
+                  ));
                 }
                 return ListView.builder(
                   padding: EdgeInsets.zero,

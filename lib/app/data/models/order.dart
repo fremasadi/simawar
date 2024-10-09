@@ -11,6 +11,7 @@ class Pesanan {
   final String type;
   final String deadline;
   final String imgUrl;
+  final String ditugaskanKe;
 
   Pesanan({
     required this.id,
@@ -22,23 +23,24 @@ class Pesanan {
     required this.status,
     required this.type,
     required this.deadline,
-    required this.imgUrl
+    required this.imgUrl,
+    required this.ditugaskanKe,
   });
 
   factory Pesanan.fromDocumentSnapshot(DocumentSnapshot doc) {
     var data = doc.data() as Map<String, dynamic>;
     return Pesanan(
-      id: doc.id,
-      name: data['name'] ?? '',
-      address: data['address'] ?? '',
-      phoneNumber: data['phoneNumber'] ?? '',
-      quantity: data['quantity'] ?? '',
-      sizes: data['sizes'] ?? {},
-      status: data['status'] ?? '',
-      type: data['type'] ?? '',
-      deadline: data['deadline'] ?? '',
-      imgUrl: data['imgUrl'] ?? ''
-    );
+        id: doc.id,
+        name: data['name'] ?? '',
+        address: data['address'] ?? '',
+        phoneNumber: data['phoneNumber'] ?? '',
+        quantity: data['quantity'] ?? '',
+        sizes: data['sizes'] ?? {},
+        status: data['status'] ?? '',
+        type: data['type'] ?? '',
+        deadline: data['deadline'] ?? '',
+        imgUrl: data['imgUrl'] ?? '',
+        ditugaskanKe: data['ditugaskanKe'] ?? '');
   }
 
   // Definisikan toMap() di sini
@@ -53,7 +55,8 @@ class Pesanan {
       'status': status,
       'type': type,
       'deadline': deadline,
-      'imgUrl' : imgUrl
+      'imgUrl': imgUrl,
+      'ditugaskanKe': ditugaskanKe
     };
   }
 }

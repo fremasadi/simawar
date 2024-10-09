@@ -18,7 +18,7 @@ class HomeView extends GetView<HomeController> {
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(
-              top: ConstSize.appBarHeight(), left: 20, right: 20),
+              top: ConstSize.appBarHeight(), left: 16.sp, right: 16.sp),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -153,27 +153,34 @@ class HomeView extends GetView<HomeController> {
               ),
               Obx(() {
                 if (controller.hasPendingOrder.value) {
-                  return  Text(
-                    "Mohon selesaikan pesanan Anda",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
+                  return Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      "Mohon Maaf selesaikan Perkejaan Anda "
+                      "Dan Jika sudah Selesai Dan Dikonfirmasi Admin Maka Akan "
+                      "Bisa Ngambil Job Lagi",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   );
                 }
 
-                if (controller.filteredOrders.isEmpty) {
+                if (controller.orders.isEmpty) {
                   return const Center(child: Text("Tidak ada pesanan."));
                 }
 
                 return ListView.builder(
-                  shrinkWrap: true, // Tambahkan ini untuk mencegah overflow
-                  physics: const NeverScrollableScrollPhysics(), // Nonaktifkan scroll pada ListView
-                  itemCount: controller.filteredOrders.length,
+                  shrinkWrap: true,
+                  // Tambahkan ini untuk mencegah overflow
+                  physics: const NeverScrollableScrollPhysics(),
+                  // Nonaktifkan scroll pada ListView
+                  itemCount: controller.orders.length,
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
-                    var order = controller.filteredOrders[index];
+                    var order = controller.orders[index];
 
                     return Container(
                       padding: EdgeInsets.all(8.sp),
@@ -209,7 +216,9 @@ class HomeView extends GetView<HomeController> {
                                   color: ConstColor.secondaryColor,
                                 ),
                               ),
-                              SizedBox(height: 4.h,),
+                              SizedBox(
+                                height: 4.h,
+                              ),
                               Row(
                                 children: [
                                   Text(
@@ -234,7 +243,8 @@ class HomeView extends GetView<HomeController> {
                           const Spacer(),
                           IconButton(
                             onPressed: () {
-                              Get.to(() => DetailOrderView(), arguments: {'order': order.toMap()});
+                              Get.to(() => DetailOrderView(),
+                                  arguments: {'order': order.toMap()});
                             },
                             icon: const Icon(
                               Icons.arrow_forward_ios,
@@ -246,8 +256,6 @@ class HomeView extends GetView<HomeController> {
                   },
                 );
               }),
-
-
             ],
           ),
         ),

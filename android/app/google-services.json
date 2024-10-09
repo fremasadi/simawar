@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "580500823984",
+    "project_id": "simawar-32ffb",
+    "storage_bucket": "simawar-32ffb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580500823984:android:b14f438d4b6585fe490075",
+        "android_client_info": {
+          "package_name": "com.example.simawar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0pNPcc8O0-XduVSFT1PFskx_C6Aedfh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580500823984:android:d907a1f8a63839eb490075",
+        "android_client_info": {
+          "package_name": "com.example.simawar_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0pNPcc8O0-XduVSFT1PFskx_C6Aedfh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
