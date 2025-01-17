@@ -43,6 +43,13 @@ dependencies:
   intl: ^0.19.0
   qr_code_scanner: ^1.0.1
   camera: ^0.11.0+2
+  flutter_launcher_icons: ^0.14.1
+  shared_preferences: ^2.3.5
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/notes.png"
 
 dev_dependencies:
   flutter_test:
@@ -99,3 +106,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+

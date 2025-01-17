@@ -55,7 +55,7 @@ class AbsensiView extends GetView<AbsensiController> {
                 child: Row(
                   children: [
                     Text(
-                      'Riwayat Absen Bulan Oktober',
+                      'Riwayat Absen Bulan Ini',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontFamily: 'semiBold',
@@ -96,7 +96,6 @@ class AbsensiView extends GetView<AbsensiController> {
 
                     final tanggal = data['tanggal'];
                     final waktuMasuk = data['Masuk'] ?? '-';
-                    final waktuKeluar = data['Keluar'] ?? '-';
 
                     return Container(
                       padding: EdgeInsets.all(16.sp),
@@ -127,7 +126,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Hadir',
+                                    'Status',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontFamily: 'semiBold',
@@ -135,7 +134,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                     ),
                                   ),
                                   Text(
-                                    waktuMasuk,
+                                    'Jam Hadir',
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: Colors.black54,
@@ -147,7 +146,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Keluar',
+                                    'Hadir',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontFamily: 'semiBold',
@@ -155,7 +154,7 @@ class AbsensiView extends GetView<AbsensiController> {
                                     ),
                                   ),
                                   Text(
-                                    waktuKeluar,
+                                    waktuMasuk,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: Colors.black54,

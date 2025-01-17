@@ -63,8 +63,7 @@ class _ScanQrViewState extends State<ScanQrView> {
       final parts = qrCode.split('|');
       final user = FirebaseAuth.instance.currentUser;
 
-      if (parts.length == 2 &&
-          (parts[0] == 'ABSEN_MASUK' || parts[0] == 'ABSEN_KELUAR')) {
+      if (parts.length == 2 && parts[0] == 'ABSEN_MASUK') {
         final timestamp = DateTime.parse(parts[1]);
 
         if (user != null) {
@@ -72,58 +71,34 @@ class _ScanQrViewState extends State<ScanQrView> {
           final startOfDay =
               DateTime(timestamp.year, timestamp.month, timestamp.day);
 
-          if (parts[0] == 'ABSEN_MASUK') {
-            // Query untuk memeriksa apakah absen masuk sudah ada untuk user pada hari ini
-            final absensiMasukQuery = await FirebaseFirestore.instance
-                .collection('absensi')
-                .where('userId', isEqualTo: user.uid)
-                .where('tipeAbsen', isEqualTo: 'Masuk')
-                .where('waktuAbsen', isGreaterThanOrEqualTo: startOfDay)
-                .get();
+          // Query untuk memeriksa apakah absen masuk sudah ada untuk user pada hari ini
+          final absensiMasukQuery = await FirebaseFirestore.instance
+              .collection('absensi')
+              .where('userId', isEqualTo: user.uid)
+              .where('tipeAbsen', isEqualTo: 'Masuk')
+              .where('waktuAbsen', isGreaterThanOrEqualTo: startOfDay)
+              .get();
 
-            if (absensiMasukQuery.docs.isNotEmpty) {
-              // Jika sudah ada absen masuk hari ini
-              Get.snackbar(
-                  'Sudah Absen', 'Anda sudah melakukan absen masuk hari ini');
-            } else {
-              // Jika belum ada, tambahkan data absen masuk ke Firestore
-              await FirebaseFirestore.instance.collection('absensi').add({
-                'userId': user.uid,
-                'waktuAbsen': timestamp,
-                'tipeAbsen': 'Masuk',
-                'waktuScan': FieldValue.serverTimestamp(),
-              });
-              Get.snackbar('Sukses', 'Absensi masuk berhasil dicatat');
-            }
-          } else if (parts[0] == 'ABSEN_KELUAR') {
-            // Query untuk memeriksa apakah absen keluar sudah ada untuk user pada hari ini
-            final absensiKeluarQuery = await FirebaseFirestore.instance
-                .collection('absensi')
-                .where('userId', isEqualTo: user.uid)
-                .where('tipeAbsen', isEqualTo: 'Keluar')
-                .where('waktuAbsen', isGreaterThanOrEqualTo: startOfDay)
-                .get();
-
-            if (absensiKeluarQuery.docs.isNotEmpty) {
-              // Jika sudah ada absen keluar hari ini
-              Get.snackbar(
-                  'Sudah Absen', 'Anda sudah melakukan absen keluar hari ini');
-            } else {
-              // Jika belum ada, tambahkan data absen keluar ke Firestore
-              await FirebaseFirestore.instance.collection('absensi').add({
-                'userId': user.uid,
-                'waktuAbsen': timestamp,
-                'tipeAbsen': 'Keluar',
-                'waktuScan': FieldValue.serverTimestamp(),
-              });
-              Get.snackbar('Sukses', 'Absensi keluar berhasil dicatat');
-            }
+          if (absensiMasukQuery.docs.isNotEmpty) {
+            // Jika sudah ada absen masuk hari ini
+            Get.snackbar(
+                'Sudah Absen', 'Anda sudah melakukan absen masuk hari ini');
+          } else {
+            // Jika belum ada, tambahkan data absen masuk ke Firestore
+            await FirebaseFirestore.instance.collection('absensi').add({
+              'userId': user.uid,
+              'waktuAbsen': timestamp,
+              'tipeAbsen': 'Masuk',
+              'waktuScan': FieldValue.serverTimestamp(),
+            });
+            Get.snackbar('Sukses', 'Absensi masuk berhasil dicatat');
           }
         } else {
           Get.snackbar('Error', 'Pengguna tidak terautentikasi');
         }
       } else {
-        Get.snackbar('Error', 'Format QR Code tidak valid');
+        Get.snackbar('Error',
+            'Format QR Code tidak valid atau bukan untuk absensi masuk');
       }
     } catch (e) {
       Get.snackbar('Error', 'Terjadi kesalahan: $e');

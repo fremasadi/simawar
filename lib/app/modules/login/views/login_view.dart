@@ -23,7 +23,7 @@ class LoginView extends GetView<LoginController> {
             children: [
               Center(
                 child: Image.asset(
-                  'assets/images/img_logo.png',
+                  'assets/images/img_logosi.png',
                   height: 150.h,
                   width: double.infinity,
                 ),
@@ -67,15 +67,18 @@ class LoginView extends GetView<LoginController> {
       decoration: InputDecoration(
         labelText: 'Email',
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
       ),
@@ -95,15 +98,18 @@ class LoginView extends GetView<LoginController> {
       decoration: InputDecoration(
         labelText: 'Password',
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: ConstColor.primaryColor, width: 2.0),
+          borderSide:
+              const BorderSide(color: ConstColor.primaryColor, width: 2.0),
           borderRadius: BorderRadius.circular(12.sp),
         ),
       ),
@@ -118,29 +124,33 @@ class LoginView extends GetView<LoginController> {
   }
 
   Widget _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: () {
-        if (controller.emailController.text.isNotEmpty &&
-            controller.passwordController.text.isNotEmpty) {
-          controller.login();
-        } else {
-          Get.snackbar('Maaf', 'Silakan isi semua kolom',
-              colorText: ConstColor.white,
-              backgroundColor: Colors.redAccent,
-              snackPosition: SnackPosition.TOP);
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(double.infinity, 50.h),
-        backgroundColor: ConstColor.primaryColor,
-      ),
-      child: Text(
-        'Masuk',
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: ConstColor.white,
-        ),
-      ),
-    );
+    return Obx(() => ElevatedButton(
+          onPressed: controller.isLoading.value
+              ? null // Disable button during loading
+              : () {
+                  if (controller.emailController.text.isNotEmpty &&
+                      controller.passwordController.text.isNotEmpty) {
+                    controller.login();
+                  } else {
+                    Get.snackbar('Maaf', 'Silakan isi semua kolom',
+                        colorText: ConstColor.white,
+                        backgroundColor: Colors.redAccent,
+                        snackPosition: SnackPosition.TOP);
+                  }
+                },
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(double.infinity, 50.h),
+            backgroundColor: ConstColor.primaryColor,
+          ),
+          child: controller.isLoading.value
+              ? const CircularProgressIndicator(color: ConstColor.white)
+              : Text(
+                  'Masuk',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: ConstColor.white,
+                  ),
+                ),
+        ));
   }
 }

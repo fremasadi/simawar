@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 import '../../../routes/app_pages.dart';
 
 class LoginController extends GetxController {
@@ -10,6 +11,7 @@ class LoginController extends GetxController {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final isLoading = false.obs; // Menambahkan RxBool untuk status loading
 
   // Function to login
   Future<void> login() async {
@@ -25,11 +27,23 @@ class LoginController extends GetxController {
           .get();
 
       if (userDoc.exists && userDoc['role'] == 'karyawan') {
+        // Ambil nama pengguna dari dokumen Firestore
+        String userName = userDoc['name'];
+
+        // Simpan nama pengguna ke SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userName', userName);
+
+        isLoading.value = true; // Mengaktifkan status loading
+        await Future.delayed(
+            const Duration(seconds: 2)); // Simulasi proses login
+
+        // Navigasi ke halaman utama setelah login
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Get.offAllNamed(Routes.BASE); // Navigate to home page
         });
       } else {
-        Get.snackbar('maaf', 'login gagal');
+        Get.snackbar('Maaf', 'Login gagal');
       }
     } catch (e) {
       Get.snackbar('Login Error', e.toString(),

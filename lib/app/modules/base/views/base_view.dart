@@ -15,42 +15,53 @@ class BaseView extends GetView<BaseController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() => IndexedStack(
-        index: controller.selectedIndex.value,
-        children: const [
-          HomeView(),
-          AbsensiView(),
-          ProsesView(),
-        ],
-      )),
+            index: controller.selectedIndex.value,
+            children: [
+              HomeView(),
+              const AbsensiView(),
+              const ProsesView(),
+            ],
+          )),
       bottomNavigationBar: Obx(() => ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20), // Tambahkan border radius di sini
-          topRight: Radius.circular(20),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: controller.selectedIndex.value,
-          onTap: controller.onItemTapped,
-          selectedFontSize: 14.sp,
-          unselectedFontSize: 14.sp,
-          items:  <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard,size: 36.sp,),
-              label: 'Dashboard',
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20), // Tambahkan border radius di sini
+              topRight: Radius.circular(20),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month,size: 36.sp,),
-              label: 'Absensi',
+            child: BottomNavigationBar(
+              currentIndex: controller.selectedIndex.value,
+              onTap: controller.onItemTapped,
+              selectedFontSize: 14.sp,
+              unselectedFontSize: 14.sp,
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.dashboard,
+                    size: 36.sp,
+                  ),
+                  label: 'Dashboard',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.calendar_month,
+                    size: 36.sp,
+                  ),
+                  label: 'Absensi',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.sync_sharp,
+                    size: 36.sp,
+                  ),
+                  label: 'Proses',
+                ),
+              ],
+              selectedItemColor: ConstColor.secondaryColor,
+              // Warna ketika aktif
+              unselectedItemColor: ConstColor.white,
+              // Warna ketika inaktif
+              backgroundColor: ConstColor.primaryColor, // Warna background
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.sync_sharp,size: 36.sp,),
-              label: 'Proses',
-            ),
-          ],
-          selectedItemColor: ConstColor.secondaryColor, // Warna ketika aktif
-          unselectedItemColor: ConstColor.white, // Warna ketika inaktif
-          backgroundColor: ConstColor.primaryColor, // Warna background
-        ),
-      )),
+          )),
     );
   }
 }

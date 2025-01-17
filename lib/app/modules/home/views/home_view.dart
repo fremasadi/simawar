@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
 import 'package:simawar/app/constants/const_color.dart';
 import 'package:simawar/app/constants/const_size.dart';
-import 'package:simawar/app/modules/base/views/base_view.dart';
 import 'package:simawar/app/modules/home/views/detail_order_view.dart';
+import 'package:simawar/app/modules/home/views/history_view.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -24,7 +23,7 @@ class HomeView extends GetView<HomeController> {
             children: [
               Center(
                 child: Image.asset(
-                  'assets/images/img_logo.png',
+                  'assets/images/img_logosi.png',
                   width: context.width * .4,
                   height: context.height * .1,
                 ),
@@ -52,12 +51,33 @@ class HomeView extends GetView<HomeController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${controller.getGreeting()},pigo',
-                        style: TextStyle(
-                          fontFamily: 'semiBold',
-                          fontSize: 12.sp,
-                        ),
+                      FutureBuilder<String>(
+                        future: controller.getUserName(),
+                        // Mengambil nama pengguna
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else if (snapshot.hasData) {
+                            return Text(
+                              '${controller.getGreeting()}, ${snapshot.data}',
+                              style: TextStyle(
+                                fontFamily: 'semiBold',
+                                fontSize: 12.sp,
+                              ),
+                            );
+                          } else {
+                            return Text(
+                              '${controller.getGreeting()}, Guest',
+                              style: TextStyle(
+                                fontFamily: 'semiBold',
+                                fontSize: 12.sp,
+                              ),
+                            );
+                          }
+                        },
                       ),
                       Text(
                         'Karyawan outlet 01',
@@ -80,15 +100,21 @@ class HomeView extends GetView<HomeController> {
                       size: 22.sp,
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(6.sp),
-                    decoration: BoxDecoration(
-                      color: ConstColor.primaryColor.withOpacity(0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.logout,
-                      size: 22.sp,
+                  GestureDetector(
+                    onTap: () {
+                      controller.showLogoutConfirmationDialog();
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(6.sp),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        Icons.logout,
+                        size: 22.sp,
+                        color: ConstColor.white,
+                      ),
                     ),
                   ),
                 ],
@@ -134,7 +160,9 @@ class HomeView extends GetView<HomeController> {
                     ),
                     const Spacer(),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.to(const HistoryView());
+                      },
                       icon: Icon(
                         Icons.arrow_forward_ios,
                         size: 24.sp,
@@ -154,15 +182,19 @@ class HomeView extends GetView<HomeController> {
               Obx(() {
                 if (controller.hasPendingOrder.value) {
                   return Center(
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      "Mohon Maaf selesaikan Perkejaan Anda "
-                      "Dan Jika sudah Selesai Dan Dikonfirmasi Admin Maka Akan "
-                      "Bisa Ngambil Job Lagi",
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * .1),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        "Mohon Maaf selesaikan Perkerjaan Anda "
+                        "Dan Jika sudah Selesai Dan Dikonfirmasi Admin Maka Akan "
+                        "Bisa Ngambil Job Lagi",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   );
@@ -181,6 +213,7 @@ class HomeView extends GetView<HomeController> {
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     var order = controller.orders[index];
+                    print(order);
 
                     return Container(
                       padding: EdgeInsets.all(8.sp),
@@ -243,7 +276,7 @@ class HomeView extends GetView<HomeController> {
                           const Spacer(),
                           IconButton(
                             onPressed: () {
-                              Get.to(() => DetailOrderView(),
+                              Get.to(() => const DetailOrderView(),
                                   arguments: {'order': order.toMap()});
                             },
                             icon: const Icon(
