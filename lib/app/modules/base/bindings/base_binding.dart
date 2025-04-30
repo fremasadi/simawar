@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:simawar/app/modules/absensi/controllers/absensi_controller.dart';
 import 'package:simawar/app/modules/home/controllers/detail_order_controller.dart';
+import 'package:simawar/app/modules/home/controllers/history_controller.dart';
 import 'package:simawar/app/modules/home/controllers/home_controller.dart';
 import 'package:simawar/app/modules/proses/controllers/proses_controller.dart';
 
@@ -14,5 +15,6 @@ class BaseBinding extends Bindings {
     Get.put(DetailOrderController());
     Get.put(ProsesController());
     Get.put(AbsensiController());
+    Get.put(HistoryController());
   }
 }

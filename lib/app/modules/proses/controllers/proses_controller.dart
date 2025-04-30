@@ -1,47 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import '../../../data/models/order.dart';
+import '../../../data/repository/order_repository.dart';
 
 class ProsesController extends GetxController {
-  var isLoading = true.obs;
-  var orders = <Pesanan>[].obs;
-  var userId = ''.obs; // Observable untuk menyimpan userId dari auth
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  var isLoading = false.obs;
+  var orders = [].obs;
+  final OrderRepository _orderRepository = OrderRepository();
 
   @override
   void onInit() {
     super.onInit();
-    getCurrentUser(); // Mendapatkan userId saat inisialisasi controller
+    fetchOrders();
   }
 
-  // Mendapatkan userId dari pengguna yang sedang login
-  void getCurrentUser() {
-    var currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      userId.value = currentUser.uid;
-      fetchOrders(); // Fetch orders setelah mendapatkan userId
+  Future<void> fetchOrders() async {
+    isLoading.value = true;
+    final result = await _orderRepository.getOrdersGoing();
+
+    if (result['success'] == true && result['data'] != null) {
+      orders.value = result['data'];
+    } else {
+      orders.value = [];
+      Get.snackbar("Pesan", result['message']);
     }
-  }
-
-  // Fetch orders dengan menggunakan listen untuk real-time updates
-  void fetchOrders() {
-    isLoading(true); // Set loading state true saat memulai fetch
-    FirebaseFirestore.instance
-        .collection('pesanan')
-        .where('ditugaskanKe',
-            isEqualTo: userId.value) // Filter berdasarkan userId
-        .snapshots()
-        .listen((querySnapshot) {
-      var fetchedOrders = querySnapshot.docs
-          .map((doc) => Pesanan.fromDocumentSnapshot(doc))
-          .where((order) =>
-              order.status != 'Selesai') // Filter status != 'Selesai'
-          .toList();
-
-      orders.assignAll(fetchedOrders); // Update daftar pesanan
-      isLoading(false); // Set loading state ke false setelah fetch selesai
-    });
+    isLoading.value = false;
   }
 }

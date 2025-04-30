@@ -23,7 +23,7 @@ class HomeView extends GetView<HomeController> {
             children: [
               Center(
                 child: Image.asset(
-                  'assets/images/img_logosi.png',
+                  'assets/images/img_logo.png',
                   width: context.width * .4,
                   height: context.height * .1,
                 ),
@@ -33,73 +33,44 @@ class HomeView extends GetView<HomeController> {
               ),
               Row(
                 children: [
-                  Container(
-                    height: 40.h,
-                    width: 40.w,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          image: AssetImage(
-                            'assets/images/profile.png',
-                          ),
-                          fit: BoxFit.cover),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 12.w,
-                  ),
+                  Obx(() {
+                    return Container(
+                      height: 40.h,
+                      width: 40.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: controller.userImage.isNotEmpty
+                              ? NetworkImage(controller.userImage.value)
+                              : const AssetImage('assets/images/profile.png')
+                                  as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  }),
+                  SizedBox(width: 12.w),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FutureBuilder<String>(
-                        future: controller.getUserName(),
-                        // Mengambil nama pengguna
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (snapshot.hasData) {
-                            return Text(
-                              '${controller.getGreeting()}, ${snapshot.data}',
-                              style: TextStyle(
-                                fontFamily: 'semiBold',
-                                fontSize: 12.sp,
-                              ),
-                            );
-                          } else {
-                            return Text(
-                              '${controller.getGreeting()}, Guest',
-                              style: TextStyle(
-                                fontFamily: 'semiBold',
-                                fontSize: 12.sp,
-                              ),
-                            );
-                          }
-                        },
-                      ),
                       Text(
-                        'Karyawan outlet 01',
+                        'Selamat Datang',
                         style: TextStyle(
                           fontSize: 12.sp,
+                          fontFamily: 'SemiBold',
                         ),
                       ),
+                      Obx(() {
+                        return Text(
+                          controller.userName.isNotEmpty
+                              ? controller.userName.value
+                              : "Name",
+                          style: TextStyle(fontSize: 12.sp),
+                        );
+                      }),
                     ],
                   ),
                   const Spacer(),
-                  Container(
-                    padding: EdgeInsets.all(6.sp),
-                    margin: EdgeInsets.only(right: 6.sp),
-                    decoration: BoxDecoration(
-                      color: ConstColor.primaryColor.withOpacity(0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.settings,
-                      size: 22.sp,
-                    ),
-                  ),
                   GestureDetector(
                     onTap: () {
                       controller.showLogoutConfirmationDialog();
@@ -113,7 +84,7 @@ class HomeView extends GetView<HomeController> {
                       child: Icon(
                         Icons.logout,
                         size: 22.sp,
-                        color: ConstColor.white,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -148,20 +119,22 @@ class HomeView extends GetView<HomeController> {
                             color: ConstColor.white,
                           ),
                         ),
-                        Text(
-                          '12',
-                          style: TextStyle(
-                            fontFamily: 'bold',
-                            fontSize: 18.sp,
-                            color: ConstColor.secondaryColor,
-                          ),
-                        )
+                        Obx(() {
+                          return Text(
+                            '${controller.completedOrderCount.value}',
+                            style: TextStyle(
+                              fontFamily: 'bold',
+                              fontSize: 18.sp,
+                              color: ConstColor.secondaryColor,
+                            ),
+                          );
+                        }),
                       ],
                     ),
                     const Spacer(),
                     IconButton(
                       onPressed: () {
-                        Get.to(const HistoryView());
+                        Get.to(HistoryView());
                       },
                       icon: Icon(
                         Icons.arrow_forward_ios,
@@ -180,40 +153,21 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               Obx(() {
-                if (controller.hasPendingOrder.value) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * .1),
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        "Mohon Maaf selesaikan Perkerjaan Anda "
-                        "Dan Jika sudah Selesai Dan Dikonfirmasi Admin Maka Akan "
-                        "Bisa Ngambil Job Lagi",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (controller.orders.isEmpty) {
-                  return const Center(child: Text("Tidak ada pesanan."));
+                  return const Center(
+                      child: Text("Tidal ada pesanan yang tersedia"));
                 }
 
                 return ListView.builder(
-                  shrinkWrap: true,
-                  // Tambahkan ini untuk mencegah overflow
-                  physics: const NeverScrollableScrollPhysics(),
-                  // Nonaktifkan scroll pada ListView
                   itemCount: controller.orders.length,
+                  shrinkWrap: true,
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
-                    var order = controller.orders[index];
-                    print(order);
+                    final order = controller.orders[index];
 
                     return Container(
                       padding: EdgeInsets.all(8.sp),
@@ -242,16 +196,14 @@ class HomeView extends GetView<HomeController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                controller.getItemTypeString(order.type),
+                                order["size_model"].toString(),
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontFamily: 'semiBold',
                                   color: ConstColor.secondaryColor,
                                 ),
                               ),
-                              SizedBox(
-                                height: 4.h,
-                              ),
+                              SizedBox(height: 4.h),
                               Row(
                                 children: [
                                   Text(
@@ -262,7 +214,7 @@ class HomeView extends GetView<HomeController> {
                                     ),
                                   ),
                                   Text(
-                                    order.deadline,
+                                    order["deadline"],
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       color: ConstColor.primaryColor,
@@ -277,7 +229,7 @@ class HomeView extends GetView<HomeController> {
                           IconButton(
                             onPressed: () {
                               Get.to(() => const DetailOrderView(),
-                                  arguments: {'order': order.toMap()});
+                                  arguments: {'order': order});
                             },
                             icon: const Icon(
                               Icons.arrow_forward_ios,

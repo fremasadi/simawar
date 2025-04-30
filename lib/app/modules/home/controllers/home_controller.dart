@@ -1,56 +1,81 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simawar/app/constants/const_color.dart';
+import 'package:simawar/app/routes/app_pages.dart';
 
-import '../../../data/models/order.dart'; // Import model Pesanan
+import '../../../data/repository/auth_repository.dart';
+import '../../../data/repository/order_repository.dart';
+import '../../../data/repository/user_repository.dart'; // Import model Pesanan
 
 class HomeController extends GetxController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  var userId = ''.obs;
-  var orders = <Pesanan>[].obs;
-  var hasPendingOrder =
-      false.obs; // Menandai jika ada pesanan yang sedang dikerjakan
+  final OrderRepository _orderRepository = OrderRepository();
+  final UserRepository _userRepository = UserRepository();
+  final AuthRepository _authRepository = AuthRepository();
+
+  var orders = <Map<String, dynamic>>[].obs;
+  var userName = ''.obs;
+  var userEmail = ''.obs;
+  var userImage = ''.obs;
+  var isLoading = true.obs;
+  var errorMessage = ''.obs;
+  var completedOrderCount = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    getCurrentUser(); // Mendapatkan user ID saat controller diinisialisasi
-    fetchOrders(); // Mengambil semua pesanan
+    fetchOrders();
+    fetchUserProfile();
+    fetchCompletedOrderCount();
   }
 
-  // Mendapatkan userId dari pengguna yang sedang login
-  void getCurrentUser() {
-    var currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      userId.value = currentUser.uid;
+  Future<void> fetchUserProfile() async {
+    isLoading(true);
+    final response = await _userRepository.getUserProfile();
+    if (response['success'] == true) {
+      userName.value = response['data']['name'];
+      userEmail.value = response['data']['email'];
+      userImage.value = response['data']['image'];
+    }
+    isLoading(false);
+  }
+
+  Future<void> fetchCompletedOrderCount() async {
+    final response = await _orderRepository.getCompletedOrderCount();
+    if (response['success'] == true) {
+      completedOrderCount.value = response['total_completed_orders'];
     }
   }
 
-  // Fetch semua pesanan tanpa filter
-  void fetchOrders() {
-    FirebaseFirestore.instance
-        .collection('pesanan')
-        .snapshots()
-        .listen((querySnapshot) {
-      var fetchedOrders = querySnapshot.docs
-          .map((doc) => Pesanan.fromDocumentSnapshot(doc))
-          .toList();
+  Future<void> fetchOrders() async {
+    isLoading.value = true;
+    errorMessage.value = '';
 
-      orders.assignAll(fetchedOrders); // Update daftar pesanan
-      // Cek jika ada pesanan yang ditugaskan ke user dan statusnya "Dikerjakan"
-      hasPendingOrder.value = fetchedOrders.any((order) =>
-          order.ditugaskanKe == userId.value && order.status == 'Dikerjakan');
-    });
+    final response = await _orderRepository.getOrders();
+
+    if (response["success"] == true) {
+      orders.value = List<Map<String, dynamic>>.from(response["data"]);
+    } else {
+      errorMessage.value = response["message"];
+    }
+
+    isLoading.value = false;
   }
 
-  Future<String> getUserName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userName') ??
-        'Guest'; // Mengembalikan 'Guest' jika tidak ada nama yang disimpan
+  Future<void> takeOrder(int orderId) async {
+    isLoading.value = true;
+
+    final response = await _orderRepository.takeOrder(orderId);
+
+    if (response["success"] == true) {
+      fetchOrders(); // Refresh daftar orders setelah berhasil mengambil order
+      Get.snackbar("Sukses", "Order berhasil diambil");
+      Get.back();
+    } else {
+      Get.snackbar("Error", response["message"]);
+    }
+
+    isLoading.value = false;
   }
 
   // Fungsi untuk mendapatkan sapaan berdasarkan waktu
@@ -65,11 +90,6 @@ class HomeController extends GetxController {
     } else {
       return "Selamat Malam";
     }
-  }
-
-  // Method untuk mendapatkan item type dalam bentuk string
-  String getItemTypeString(String itemType) {
-    return itemType.toString().split('.').last;
   }
 
   Future<void> showLogoutConfirmationDialog() async {
@@ -116,7 +136,32 @@ class HomeController extends GetxController {
         width: 100.w,
         child: ElevatedButton(
           onPressed: () async {
-            await logout();
+            // Tampilkan loading indicator
+            Get.dialog(
+              barrierColor: ConstColor.white,
+              const Center(child: CircularProgressIndicator()),
+              barrierDismissible: false,
+            );
+
+            // Panggil method logout
+            final response = await _authRepository.logout();
+
+            // Tutup loading indicator
+            Get.back();
+
+            // Periksa apakah key `success` ada dan bernilai true
+            if (response['success'] == true) {
+              // Redirect ke halaman login
+              Get.offAllNamed(Routes.LOGIN);
+            } else {
+              // Tampilkan pesan error jika logout gagal
+              Get.snackbar(
+                'Error',
+                response['message'] ?? 'Terjadi kesalahan saat logout',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: ConstColor.primaryColor,
@@ -136,21 +181,5 @@ class HomeController extends GetxController {
         ),
       ),
     );
-  }
-
-  // Fungsi untuk logout pengguna
-  Future<void> logout() async {
-    try {
-      await _auth.signOut();
-      // Arahkan ke halaman login setelah logout
-      Get.offAllNamed(
-          '/login'); // Pastikan rute '/login' telah diatur di aplikasi Anda
-    } catch (e) {
-      Get.snackbar(
-        'Logout Gagal',
-        'Terjadi kesalahan saat logout. Silakan coba lagi.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
   }
 }

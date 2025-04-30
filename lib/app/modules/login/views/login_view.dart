@@ -18,43 +18,46 @@ class LoginView extends GetView<LoginController> {
           padding: EdgeInsets.symmetric(
               vertical: MediaQuery.of(context).size.height * .1,
               horizontal: 16.sp),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/images/img_logosi.png',
-                  height: 150.h,
-                  width: double.infinity,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 50.0.sp),
-                child: Text(
-                  'Masuk',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: ConstColor.secondaryColor,
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/images/img_logo.png',
+                    height: 150.h,
+                    width: double.infinity,
                   ),
                 ),
-              ),
-              Text(
-                'Karyawan Login!',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: ConstColor.black,
+                Padding(
+                  padding: EdgeInsets.only(top: 50.0.sp),
+                  child: Text(
+                    'Masuk',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: ConstColor.secondaryColor,
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20.h), // Add some spacing
-              _buildEmailField(),
-              SizedBox(height: 20.h), // Add some spacing
-              _buildPasswordField(),
-              SizedBox(height: 40.h), // Add some spacing
-              _buildLoginButton(),
-              SizedBox(height: 20.h), // Add some spacing
-            ],
+                Text(
+                  'Karyawan Login!',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: ConstColor.black,
+                  ),
+                ),
+                SizedBox(height: 20.h), // Add some spacing
+                _buildEmailField(),
+                SizedBox(height: 20.h), // Add some spacing
+                _buildPasswordField(),
+                SizedBox(height: 40.h), // Add some spacing
+                _buildLoginButton(),
+                SizedBox(height: 20.h), // Add some spacing
+              ],
+            ),
           ),
         ),
       ),
@@ -86,6 +89,9 @@ class LoginView extends GetView<LoginController> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Silakan masukkan email Anda';
+        }
+        if (!GetUtils.isEmail(value)) {
+          return 'Silakan masukkan email yang valid';
         }
         return null;
       },
@@ -126,18 +132,8 @@ class LoginView extends GetView<LoginController> {
   Widget _buildLoginButton() {
     return Obx(() => ElevatedButton(
           onPressed: controller.isLoading.value
-              ? null // Disable button during loading
-              : () {
-                  if (controller.emailController.text.isNotEmpty &&
-                      controller.passwordController.text.isNotEmpty) {
-                    controller.login();
-                  } else {
-                    Get.snackbar('Maaf', 'Silakan isi semua kolom',
-                        colorText: ConstColor.white,
-                        backgroundColor: Colors.redAccent,
-                        snackPosition: SnackPosition.TOP);
-                  }
-                },
+              ? null
+              : controller.login, // langsung panggil login
           style: ElevatedButton.styleFrom(
             minimumSize: Size(double.infinity, 50.h),
             backgroundColor: ConstColor.primaryColor,

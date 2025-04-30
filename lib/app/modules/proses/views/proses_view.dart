@@ -3,15 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:simawar/app/constants/const_size.dart';
 import 'package:simawar/app/modules/proses/views/detail_img_view.dart';
-
 import '../../../constants/const_color.dart';
 import '../controllers/proses_controller.dart';
 
-class ProsesView extends GetView<ProsesController> {
+class ProsesView extends StatelessWidget {
   const ProsesView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ProsesController controller = Get.put(ProsesController());
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -35,13 +36,16 @@ class ProsesView extends GetView<ProsesController> {
                 }
                 if (controller.orders.isEmpty) {
                   return Center(
-                      child: Padding(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * .3),
-                    child: const Text(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * .3,
+                      ),
+                      child: const Text(
+                        "Tidak ada pesanan yang sedang dikerjakan Silakan ambil pesanan.",
                         textAlign: TextAlign.center,
-                        "Tidak ada pesanan yang sedang dikerjakan Silakan ambil pesanan."),
-                  ));
+                      ),
+                    ),
+                  );
                 }
                 return ListView.builder(
                   padding: EdgeInsets.zero,
@@ -69,7 +73,7 @@ class ProsesView extends GetView<ProsesController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Nama Pemesan : ${order.name}',
+                            'Nama Pemesan : ${order["name"]}',
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
@@ -87,8 +91,7 @@ class ProsesView extends GetView<ProsesController> {
                                 ),
                               ),
                               Text(
-                                order.deadline,
-                                // Ganti ini dengan deadline order
+                                order["deadline"] ?? "-",
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w700,
@@ -101,32 +104,54 @@ class ProsesView extends GetView<ProsesController> {
                           GestureDetector(
                             onTap: () {
                               Get.to(DetailImgView(),
-                                  arguments: {'imgUrl': order.imgUrl});
+                                  arguments: {'image': order["image"]});
                             },
                             child: Image.network(
-                              order.imgUrl,
+                              order["image"] ?? "",
                               width: double.infinity,
                               height: context.height * .5,
                               fit: BoxFit.fill,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image),
                             ),
                           ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            'Ukuran:',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
-                              color: ConstColor.black,
+                          Container(
+                            width: double.infinity,
+                            color: Colors.white,
+                            padding: EdgeInsets.all(16.sp),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionTitle("Detail Ukuran"),
+                                ...order['size'].entries.map<Widget>((e) {
+                                  return Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 4.h),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          e.key,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        Text(
+                                          '${e.value} cm',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
                             ),
                           ),
-                          for (var entry in order.sizes.entries)
-                            Text(
-                              '${entry.key} : ${entry.value}',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: ConstColor.black,
-                              ),
-                            ),
                         ],
                       ),
                     );
@@ -136,6 +161,17 @@ class ProsesView extends GetView<ProsesController> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
       ),
     );
   }
