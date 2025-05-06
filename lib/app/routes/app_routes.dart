@@ -8,6 +8,7 @@ abstract class Routes {
   static const ABSENSI = _Paths.ABSENSI;
   static const PROSES = _Paths.PROSES;
   static const LOGIN = _Paths.LOGIN;
+  static const SALARY = _Paths.SALARY;
 }
 
 abstract class _Paths {
@@ -17,4 +18,5 @@ abstract class _Paths {
   static const ABSENSI = '/absensi';
   static const PROSES = '/proses';
   static const LOGIN = '/login';
+  static const SALARY = '/salary';
 }

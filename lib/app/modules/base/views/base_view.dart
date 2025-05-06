@@ -16,10 +16,10 @@ class BaseView extends GetView<BaseController> {
     return Scaffold(
       body: Obx(() => IndexedStack(
             index: controller.selectedIndex.value,
-            children: [
+            children: const [
               HomeView(),
-              const AbsensiView(),
-              const ProsesView(),
+              AbsensiView(),
+              ProsesView(),
             ],
           )),
       bottomNavigationBar: Obx(() => ClipRRect(

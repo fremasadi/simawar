@@ -52,7 +52,9 @@ class HistoryView extends GetView<HistoryController> {
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: Image.network(
-                    order['image'],
+                    (order['images'] as List).isNotEmpty
+                        ? order['images'][0]
+                        : '',
                     width: 50.w,
                     height: 50.w,
                     fit: BoxFit.cover,

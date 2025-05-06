@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:simawar/app/constants/const_color.dart';
 
 class DetailImgView extends StatelessWidget {
+  const DetailImgView({super.key});
+
   @override
   Widget build(BuildContext context) {
-    // Mengambil imgUrl dari arguments
-    final String imgUrl = Get.arguments['imgUrl'];
+    final args = Get.arguments as Map;
+    final List images = args['images'];
+    final int initialIndex = args['initialIndex'] ?? 0;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: ConstColor.backgroundColor,
-        title: const Text("Detail Gambar Model"),
-      ),
-      body: Center(
-        child: Image.network(
-          imgUrl, // Tampilkan gambar yang diterima
-          width: double.infinity,
-          height: context.height * .7,
-          fit: BoxFit.cover,
-        ),
+      appBar: AppBar(title: const Text('Detail Gambar')),
+      body: PageView.builder(
+        controller: PageController(initialPage: initialIndex),
+        itemCount: images.length,
+        itemBuilder: (context, index) {
+          return InteractiveViewer(
+            child: Image.network(
+              images[index],
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.broken_image),
+            ),
+          );
+        },
       ),
     );
   }

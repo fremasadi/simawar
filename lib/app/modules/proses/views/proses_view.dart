@@ -103,11 +103,18 @@ class ProsesView extends StatelessWidget {
                           SizedBox(height: 12.h),
                           GestureDetector(
                             onTap: () {
-                              Get.to(DetailImgView(),
-                                  arguments: {'image': order["image"]});
+                              Get.to(
+                                () => DetailImgView(),
+                                arguments: {
+                                  'images': order["images"],
+                                  'initialIndex': 0,
+                                },
+                              );
                             },
                             child: Image.network(
-                              order["image"] ?? "",
+                              (order["images"] as List).isNotEmpty
+                                  ? order["images"][0]
+                                  : "",
                               width: double.infinity,
                               height: context.height * .5,
                               fit: BoxFit.fill,

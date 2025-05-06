@@ -10,6 +10,8 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/proses/bindings/proses_binding.dart';
 import '../modules/proses/views/proses_view.dart';
+import '../modules/salary/bindings/salary_binding.dart';
+import '../modules/salary/views/salary_view.dart';
 
 part 'app_routes.dart';
 
@@ -43,6 +45,11 @@ class AppPages {
       name: _Paths.LOGIN,
       page: () => const LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: _Paths.SALARY,
+      page: () => const SalaryView(),
+      binding: SalaryBinding(),
     ),
   ];
 }

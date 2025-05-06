@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:simawar/app/constants/const_color.dart';
 import 'package:simawar/app/routes/app_pages.dart';
 
+import '../../../data/models/order.dart';
 import '../../../data/repository/auth_repository.dart';
 import '../../../data/repository/order_repository.dart';
 import '../../../data/repository/user_repository.dart'; // Import model Pesanan
@@ -12,8 +13,8 @@ class HomeController extends GetxController {
   final OrderRepository _orderRepository = OrderRepository();
   final UserRepository _userRepository = UserRepository();
   final AuthRepository _authRepository = AuthRepository();
+  var orders = <Order>[].obs;
 
-  var orders = <Map<String, dynamic>>[].obs;
   var userName = ''.obs;
   var userEmail = ''.obs;
   var userImage = ''.obs;
@@ -33,49 +34,81 @@ class HomeController extends GetxController {
     isLoading(true);
     final response = await _userRepository.getUserProfile();
     if (response['success'] == true) {
-      userName.value = response['data']['name'];
-      userEmail.value = response['data']['email'];
-      userImage.value = response['data']['image'];
+      userName.value = response['data']['name'] ?? '';
+      userEmail.value = response['data']['email'] ?? '';
+      userImage.value = response['data']['image'] ?? '';
     }
     isLoading(false);
   }
 
   Future<void> fetchCompletedOrderCount() async {
-    final response = await _orderRepository.getCompletedOrderCount();
-    if (response['success'] == true) {
-      completedOrderCount.value = response['total_completed_orders'];
+    try {
+      final response = await _orderRepository.getCompletedOrderCount();
+      if (response['success'] == true) {
+        completedOrderCount.value = response['total_completed_orders'] as int;
+      } else {
+        errorMessage.value =
+            response['message'] ?? 'Gagal memuat jumlah order selesai';
+      }
+    } catch (e) {
+      errorMessage.value = 'Terjadi kesalahan saat memuat jumlah order selesai';
     }
   }
 
   Future<void> fetchOrders() async {
-    isLoading.value = true;
-    errorMessage.value = '';
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
 
-    final response = await _orderRepository.getOrders();
+      final response = await _orderRepository.getOrders();
 
-    if (response["success"] == true) {
-      orders.value = List<Map<String, dynamic>>.from(response["data"]);
-    } else {
-      errorMessage.value = response["message"];
+      if (response["success"] == true) {
+        final data = response["data"] as List;
+        orders.assignAll(data.map((e) => Order.fromJson(e)).toList());
+        errorMessage.value = ''; // Clear error message if success
+      } else {
+        orders.clear(); // Clear existing orders
+        errorMessage.value = response["message"] ?? 'Gagal memuat order';
+      }
+    } catch (e) {
+      orders.clear();
+      errorMessage.value = 'Terjadi kesalahan saat memuat order: $e';
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   Future<void> takeOrder(int orderId) async {
-    isLoading.value = true;
+    try {
+      isLoading.value = true;
+      final response = await _orderRepository.takeOrder(orderId);
 
-    final response = await _orderRepository.takeOrder(orderId);
-
-    if (response["success"] == true) {
-      fetchOrders(); // Refresh daftar orders setelah berhasil mengambil order
-      Get.snackbar("Sukses", "Order berhasil diambil");
-      Get.back();
-    } else {
-      Get.snackbar("Error", response["message"]);
+      if (response["success"] == true) {
+        await fetchOrders(); // Refresh data setelah mengambil order
+        Get.snackbar(
+          "Sukses",
+          "Order berhasil diambil",
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 5),
+        );
+      } else {
+        Get.snackbar(
+          "Error",
+          response["message"] ?? 'Order Sudah Diambil',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        'Terjadi kesalahan saat mengambil order: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   // Fungsi untuk mendapatkan sapaan berdasarkan waktu

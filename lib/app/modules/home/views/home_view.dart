@@ -5,6 +5,7 @@ import 'package:simawar/app/constants/const_color.dart';
 import 'package:simawar/app/constants/const_size.dart';
 import 'package:simawar/app/modules/home/views/detail_order_view.dart';
 import 'package:simawar/app/modules/home/views/history_view.dart';
+import 'package:simawar/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -134,7 +135,52 @@ class HomeView extends GetView<HomeController> {
                     const Spacer(),
                     IconButton(
                       onPressed: () {
-                        Get.to(HistoryView());
+                        Get.to(const HistoryView());
+                      },
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 24.sp,
+                        color: ConstColor.white,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(16.sp),
+                margin: EdgeInsets.only(bottom: 8.sp),
+                decoration: BoxDecoration(
+                  color: ConstColor.primaryColor,
+                  borderRadius: BorderRadius.circular(16.sp),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/icons/ic_history.png',
+                      width: 50.w,
+                      height: 50.h,
+                      color: ConstColor.white,
+                    ),
+                    SizedBox(
+                      width: 8.w,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Data Penggajian',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontFamily: 'Medium',
+                            color: ConstColor.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        Get.toNamed(Routes.SALARY);
                       },
                       icon: Icon(
                         Icons.arrow_forward_ios,
@@ -155,6 +201,19 @@ class HomeView extends GetView<HomeController> {
               Obx(() {
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
+                }
+                // Tampilkan pesan error jika ada
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.sp),
+                      child: Text(
+                        controller.errorMessage.value,
+                        style: TextStyle(fontSize: 14.sp, color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
                 }
 
                 if (controller.orders.isEmpty) {
@@ -196,7 +255,8 @@ class HomeView extends GetView<HomeController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order["size_model"].toString(),
+                                order.sizeModel,
+                                // Menggunakan property dari model
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontFamily: 'semiBold',
@@ -214,7 +274,8 @@ class HomeView extends GetView<HomeController> {
                                     ),
                                   ),
                                   Text(
-                                    order["deadline"],
+                                    order.deadline,
+                                    // Menggunakan property dari model
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       color: ConstColor.primaryColor,

@@ -1,62 +1,67 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-//
-// class Pesanan {
-//   final String id;
-//   final String name;
-//   final String address;
-//   final String phoneNumber;
-//   final String quantity;
-//   final Map<String, dynamic> sizes;
-//   final String status;
-//   final String type;
-//   final String deadline;
-//   final String imgUrl;
-//   final String ditugaskanKe;
-//
-//   Pesanan({
-//     required this.id,
-//     required this.name,
-//     required this.address,
-//     required this.phoneNumber,
-//     required this.quantity,
-//     required this.sizes,
-//     required this.status,
-//     required this.type,
-//     required this.deadline,
-//     required this.imgUrl,
-//     required this.ditugaskanKe,
-//   });
-//
-//   factory Pesanan.fromDocumentSnapshot(DocumentSnapshot doc) {
-//     var data = doc.data() as Map<String, dynamic>;
-//     return Pesanan(
-//         id: doc.id,
-//         name: data['name'] ?? '',
-//         address: data['address'] ?? '',
-//         phoneNumber: data['phoneNumber'] ?? '',
-//         quantity: data['quantity'] ?? '',
-//         sizes: data['sizes'] ?? {},
-//         status: data['status'] ?? '',
-//         type: data['type'] ?? '',
-//         deadline: data['deadline'] ?? '',
-//         imgUrl: data['imgUrl'] ?? '',
-//         ditugaskanKe: data['ditugaskanKe'] ?? '');
-//   }
-//
-//   // Definisikan toMap() di sini
-//   Map<String, dynamic> toMap() {
-//     return {
-//       'id': id,
-//       'name': name,
-//       'address': address,
-//       'phoneNumber': phoneNumber,
-//       'quantity': quantity,
-//       'sizes': sizes,
-//       'status': status,
-//       'type': type,
-//       'deadline': deadline,
-//       'imgUrl': imgUrl,
-//       'ditugaskanKe': ditugaskanKe
-//     };
-//   }
-// }
+class Order {
+  final int id;
+  final String name;
+  final String address;
+  final String deadline;
+  final String phone;
+  final List<String> images;
+  final int quantity;
+  final String sizeModel;
+  final Map<String, dynamic> size;
+  final String status;
+  final dynamic assignedTo;
+  final String createdAt;
+  final String updatedAt;
+
+  Order({
+    required this.id,
+    required this.name,
+    required this.address,
+    required this.deadline,
+    required this.phone,
+    required this.images,
+    required this.quantity,
+    required this.sizeModel,
+    required this.size,
+    required this.status,
+    required this.assignedTo,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      address: json['address'] as String,
+      deadline: json['deadline'] as String,
+      phone: json['phone'] as String,
+      images: List<String>.from(json['images']),
+      quantity: json['quantity'] as int,
+      sizeModel: json['size_model'] as String,
+      size: Map<String, dynamic>.from(json['size']),
+      status: json['status'] as String,
+      assignedTo: json['ditugaskan_ke'],
+      createdAt: json['created_at'] as String,
+      updatedAt: json['updated_at'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'address': address,
+      'deadline': deadline,
+      'phone': phone,
+      'images': images,
+      'quantity': quantity,
+      'size_model': sizeModel,
+      'size': size,
+      'status': status,
+      'ditugaskan_ke': assignedTo,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
+  }
+}
