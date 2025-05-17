@@ -71,7 +71,7 @@ class AttendanceRepository {
       final responseData = jsonDecode(response.body);
 
       // Jika status 200, tambahkan flag success:true
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         // Tambahkan field success ke respons API
         responseData['success'] = true;
         return responseData;

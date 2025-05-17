@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simawar/app/constants/const_color.dart';
 import 'package:simawar/app/routes/app_pages.dart';
 
 import '../../../data/models/order.dart';
 import '../../../data/repository/auth_repository.dart';
 import '../../../data/repository/order_repository.dart';
-import '../../../data/repository/user_repository.dart'; // Import model Pesanan
+import '../../proses/controllers/proses_controller.dart';
 
 class HomeController extends GetxController {
   final OrderRepository _orderRepository = OrderRepository();
-  final UserRepository _userRepository = UserRepository();
   final AuthRepository _authRepository = AuthRepository();
+  final ProsesController prosesController = Get.find<ProsesController>();
+
   var orders = <Order>[].obs;
 
   var userName = ''.obs;
-  var userEmail = ''.obs;
   var userImage = ''.obs;
   var isLoading = true.obs;
   var errorMessage = ''.obs;
@@ -26,19 +27,14 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     fetchOrders();
-    fetchUserProfile();
     fetchCompletedOrderCount();
+    loadUserData();
   }
 
-  Future<void> fetchUserProfile() async {
-    isLoading(true);
-    final response = await _userRepository.getUserProfile();
-    if (response['success'] == true) {
-      userName.value = response['data']['name'] ?? '';
-      userEmail.value = response['data']['email'] ?? '';
-      userImage.value = response['data']['image'] ?? '';
-    }
-    isLoading(false);
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    userName.value = prefs.getString('name') ?? '';
+    userImage.value = prefs.getString('image') ?? '';
   }
 
   Future<void> fetchCompletedOrderCount() async {
@@ -85,10 +81,11 @@ class HomeController extends GetxController {
 
       if (response["success"] == true) {
         await fetchOrders(); // Refresh data setelah mengambil order
+        await prosesController.fetchOrders();
         Get.snackbar(
           "Sukses",
           "Order berhasil diambil",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 5),
         );
       } else {

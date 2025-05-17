@@ -7,11 +7,20 @@ class SalaryController extends GetxController {
   var salaryList = [].obs;
   var isLoading = false.obs;
   var salaryDeductions = [].obs;
+  var filterStatus = 'all'.obs; // 'all', 'paid', 'pending'
 
-  Future<void> loadSalaryHistory() async {
+// Method untuk mengubah filter
+  void setFilterStatus(String status) {
+    filterStatus.value = status;
+  }
+
+  Future<void> loadSalaryHistory({String? fromDate, String? toDate}) async {
     isLoading.value = true;
 
-    final result = await repository.fetchSalaryHistory();
+    final result = await repository.fetchSalaryHistory(
+      fromDate: fromDate,
+      toDate: toDate,
+    );
 
     if (result["success"]) {
       salaryList.value = result["data"];

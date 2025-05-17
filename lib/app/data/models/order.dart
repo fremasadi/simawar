@@ -5,7 +5,7 @@ class Order {
   final String deadline;
   final String phone;
   final List<String> images;
-  final int quantity;
+  final String quantity;
   final String sizeModel;
   final Map<String, dynamic> size;
   final String status;
@@ -37,7 +37,8 @@ class Order {
       deadline: json['deadline'] as String,
       phone: json['phone'] as String,
       images: List<String>.from(json['images']),
-      quantity: json['quantity'] as int,
+      quantity: json['quantity'] as String,
+      // Changed from int to String
       sizeModel: json['size_model'] as String,
       size: Map<String, dynamic>.from(json['size']),
       status: json['status'] as String,

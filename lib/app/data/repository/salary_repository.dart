@@ -5,7 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/string.dart';
 
 class SalaryRepository {
-  Future<Map<String, dynamic>> fetchSalaryHistory() async {
+  Future<Map<String, dynamic>> fetchSalaryHistory({
+    String? fromDate,
+    String? toDate,
+  }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString("token");
 
@@ -13,7 +16,15 @@ class SalaryRepository {
       return {"success": false, "message": "Token tidak ditemukan"};
     }
 
-    final url = Uri.parse('$baseUrl/salary-history');
+    final uri = Uri.parse('$baseUrl/salary-history');
+
+    // Tambahkan parameter hanya jika ada
+    final url = uri.replace(
+      queryParameters: {
+        if (fromDate != null) 'from': fromDate,
+        if (toDate != null) 'to': toDate,
+      },
+    );
 
     try {
       final response = await http.get(

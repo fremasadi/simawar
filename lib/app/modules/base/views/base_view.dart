@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:simawar/main.dart';
 import '../../../constants/const_color.dart';
 import '../../absensi/views/absensi_view.dart';
 import '../../home/views/home_view.dart';
@@ -14,14 +13,16 @@ class BaseView extends GetView<BaseController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(() => IndexedStack(
-            index: controller.selectedIndex.value,
-            children: const [
-              HomeView(),
-              AbsensiView(),
-              ProsesView(),
-            ],
-          )),
+      body: Obx(
+        () => IndexedStack(
+          index: controller.selectedIndex.value,
+          children: const [
+            HomeView(),
+            AbsensiView(),
+            ProsesView(),
+          ],
+        ),
+      ),
       bottomNavigationBar: Obx(() => ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20), // Tambahkan border radius di sini
@@ -35,10 +36,10 @@ class BaseView extends GetView<BaseController> {
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(
-                    Icons.dashboard,
+                    Icons.home,
                     size: 36.sp,
                   ),
-                  label: 'Dashboard',
+                  label: 'Beranda',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(
@@ -56,9 +57,7 @@ class BaseView extends GetView<BaseController> {
                 ),
               ],
               selectedItemColor: ConstColor.secondaryColor,
-              // Warna ketika aktif
               unselectedItemColor: ConstColor.white,
-              // Warna ketika inaktif
               backgroundColor: ConstColor.primaryColor, // Warna background
             ),
           )),
